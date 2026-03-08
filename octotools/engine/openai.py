@@ -23,6 +23,8 @@ import openai
 from dotenv import load_dotenv
 load_dotenv()
 
+FORGE_DEFAULT_BASE_URL = "https://api.forge.tensorblock.co/v1"
+
 
 from pydantic import BaseModel
 
@@ -79,20 +81,33 @@ class ChatOpenAI(EngineLM, CachedEngine):
         self.is_chat_model = validate_chat_model(self.model_string)
         self.is_reasoning_model = validate_reasoning_model(self.model_string)
         self.is_pro_reasoning_model = validate_pro_reasoning_model(self.model_string)
+        forge_api_key = os.getenv("FORGE_API_KEY")
+        self.is_forge = bool(forge_api_key) and "/" in self.model_string
 
         if self.use_cache:
             root = platformdirs.user_cache_dir("octotools")
-            cache_path = os.path.join(root, f"cache_openai_{self.model_string}.db")
+            cache_model_string = self.model_string.replace("/", "_")
+            cache_path = os.path.join(root, f"cache_openai_{cache_model_string}.db")
             self.image_cache_dir = os.path.join(root, "image_cache")
             os.makedirs(self.image_cache_dir, exist_ok=True)
             super().__init__(cache_path=cache_path)
         
-        if os.getenv("OPENAI_API_KEY") is None:
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        if not self.is_forge and openai_api_key is None:
+            if forge_api_key:
+                raise ValueError(
+                    "FORGE_API_KEY is set, but the model string must use Provider/model-name "
+                    "(e.g., OpenAI/gpt-4o-mini) to route through Forge."
+                )
             raise ValueError("Please set the OPENAI_API_KEY environment variable if you'd like to use OpenAI models.")
-        
-        self.client = OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-        )
+
+        client_kwargs = {"api_key": forge_api_key if self.is_forge else openai_api_key}
+        if self.is_forge:
+            client_kwargs["base_url"] = os.getenv("FORGE_API_BASE") or FORGE_DEFAULT_BASE_URL
+            # Forge only exposes /v1/chat/completions
+            self.is_pro_reasoning_model = False
+
+        self.client = OpenAI(**client_kwargs)
 
 
     @retry(wait=wait_random_exponential(min=1, max=5), stop=stop_after_attempt(5))
