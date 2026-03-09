@@ -5,6 +5,10 @@ def create_llm_engine(model_string: str, use_cache: bool = False, is_multimodal:
     Factory function to create appropriate LLM engine instance.
     """
 
+    if model_string.startswith("forge/"):
+        from .openai import ChatOpenAI
+        return ChatOpenAI(model_string=model_string, use_cache=use_cache, is_multimodal=is_multimodal, **kwargs)
+
     if "azure" in model_string:
         from .azure import ChatAzureOpenAI
         model_string = model_string.replace("azure-", "")
