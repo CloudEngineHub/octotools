@@ -72,17 +72,19 @@ class ChatOpenAI(EngineLM, CachedEngine):
         :param is_multimodal:
         """
 
-        self.model_string = model_string
         self.use_cache = use_cache
         self.system_prompt = system_prompt
         self.is_multimodal = is_multimodal
+
+        forge_api_key = os.getenv("FORGE_API_KEY")
+        self.is_forge = bool(forge_api_key) and model_string.startswith("forge/")
+        # Strip the "forge/" routing prefix so the API receives "Provider/model-name"
+        self.model_string = model_string.removeprefix("forge/") if self.is_forge else model_string
 
         self.support_structured_output = validate_structured_output_model(self.model_string)
         self.is_chat_model = validate_chat_model(self.model_string)
         self.is_reasoning_model = validate_reasoning_model(self.model_string)
         self.is_pro_reasoning_model = validate_pro_reasoning_model(self.model_string)
-        forge_api_key = os.getenv("FORGE_API_KEY")
-        self.is_forge = bool(forge_api_key) and "/" in self.model_string
 
         if self.use_cache:
             root = platformdirs.user_cache_dir("octotools")
@@ -96,8 +98,8 @@ class ChatOpenAI(EngineLM, CachedEngine):
         if not self.is_forge and openai_api_key is None:
             if forge_api_key:
                 raise ValueError(
-                    "FORGE_API_KEY is set, but the model string must use Provider/model-name "
-                    "(e.g., OpenAI/gpt-4o-mini) to route through Forge."
+                    "FORGE_API_KEY is set, but the model string must use the forge/ prefix "
+                    "(e.g., forge/OpenAI/gpt-4o-mini) to route through Forge."
                 )
             raise ValueError("Please set the OPENAI_API_KEY environment variable if you'd like to use OpenAI models.")
 
