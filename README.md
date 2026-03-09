@@ -107,10 +107,11 @@ We support a broad range of LLM engines, including GPT-4o, Claude 3.5 Sonnet, Ge
 | Grok | `grok-2-vision-1212`, `grok-2-vision`, `grok-2-vision-latest` | `grok-3-mini-fast-beta`, `grok-3-mini-fast`, `grok-3-mini-fast-latest`, `grok-3-mini-beta`, `grok-3-mini`, `grok-3-mini-latest`, `grok-3-fast-beta`, `grok-3-fast`, `grok-3-fast-latest`, `grok-3-beta`, `grok-3`, `grok-3-latest` | [Grok Models](https://docs.x.ai/docs/models#models-and-pricing) |
 | vLLM | Various vLLM-supported models, for example, `Qwen2.5-VL-3B-Instruct` and `Qwen2.5-VL-72B-Instruct`. You can also use local checkpoint models for customization and local inference. ([Example-1](https://github.com/octotools/octotools/blob/main/examples/notebooks/baseball_query_local_model_qwen.ipynb), [Example-2](https://github.com/octotools/octotools/blob/main/examples/notebooks/baseball_query_parallel_inference.ipynb))| Various vLLM-supported models, for example, `Qwen2.5-1.5B-Instruct`. You can also use local checkpoint models for customization and local inference. | [vLLM Models](https://docs.vllm.ai/en/latest/models/supported_models.html) |
 | LiteLLM | Any model supported by LiteLLM, including models from OpenAI, Anthropic, Google, Mistral, Cohere, and more. | Any model supported by LiteLLM, including models from OpenAI, Anthropic, Gemini, Mistral, Cohere, and more. | [LiteLLM Models](https://docs.litellm.ai/docs/providers) |
+| Forge | Any Forge-supported models via `forge/Provider/model-name` (e.g., `forge/OpenAI/gpt-4o-mini`). | Same as multi-modal column. | [Forge Models](https://forge.tensorblock.co) |
 | Ollama | Any model supported by Ollama, such as `DeepSeek-R1`, `Qwen 3`, `Llama 3.3`, `Gemma 3`, and other models. | Any model supported by Ollama, such as `Qwen 2.5‑VL`. | [Ollama Models](https://ollama.ai/library) |
 
 
-> Note: If you are using TogetherAI models, please ensure have the prefix 'together-' in the model string, for example, `together-meta-llama/Llama-4-Scout-17B-16E-Instruct`. For VLLM models, use the prefix 'vllm-', for example, `vllm-meta-llama/Llama-4-Scout-17B-16E-Instruct`. For LiteLLM, use the prefix 'litellm-', for example, `litellm-gpt-4o` or `litellm-claude-3-sonnet-20240229`. For Ollama, use the prefix 'ollama-', for example, `ollama-qwen3:latest`. For other custom engines, you can edit the [factory.py](https://github.com/OctoTools/OctoTools/blob/main/octotools/engine/factory.py) file and add its interface file to add support for your engine. Your pull request will be warmly welcomed!
+> Note: If you are using TogetherAI models, please ensure have the prefix 'together-' in the model string, for example, `together-meta-llama/Llama-4-Scout-17B-16E-Instruct`. For VLLM models, use the prefix 'vllm-', for example, `vllm-meta-llama/Llama-4-Scout-17B-16E-Instruct`. For LiteLLM, use the prefix 'litellm-', for example, `litellm-gpt-4o` or `litellm-claude-3-sonnet-20240229`. For Ollama, use the prefix 'ollama-', for example, `ollama-qwen3:latest`. For Forge, use the prefix 'forge/', for example, `forge/OpenAI/gpt-4o-mini`, and set `FORGE_API_KEY` (optional `FORGE_API_BASE`). For other custom engines, you can edit the [factory.py](https://github.com/OctoTools/OctoTools/blob/main/octotools/engine/factory.py) file and add its interface file to add support for your engine. Your pull request will be warmly welcomed!
 
 ## Installation
 
@@ -134,6 +135,8 @@ Make `.env` file, and set `OPENAI_API_KEY`, `GOOGLE_API_KEY`, `GOOGLE_CX`, etc. 
 
 # Used for LLM-powered modules and tools
 OPENAI_API_KEY=<your-api-key-here> # If you want to use OpenAI LLM
+FORGE_API_KEY=<your-api-key-here> # If you want to use Forge LLM (OpenAI-compatible)
+FORGE_API_BASE=https://api.forge.tensorblock.co/v1 # Optional custom Forge base URL
 ANTHROPIC_API_KEY=<your-api-key-here> # If you want to use Anthropic LLM
 TOGETHER_API_KEY=<your-api-key-here> # If you want to use TogetherAI LLM
 DEEPSEEK_API_KEY=<your-api-key-here> # If you want to use DeepSeek LLM
