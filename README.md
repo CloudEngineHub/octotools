@@ -327,6 +327,9 @@ To customize **OctoTools** for your own tasks:
 
 1. **Add a new tool card**: Implement your tool following the structure in [existing tools](https://github.com/octotools/OctoTools/tree/main/octotools/tools).
 
+   For free web search and page fetching without an API key, see the optional
+   [Parallel Search Tool](octotools/tools/parallel_search/README.md).
+
 2. **Replace or update existing tools**: You can replace or update tools in the toolbox. For example, we provide the [`Object_Detector_Tool`](https://github.com/octotools/OctoTools/blob/main/octotools/tools/object_detector/tool.py) to detect objects in images using an open-source model. We also provide an alternative tool called the [`Advanced_Object_Detector_Tool`](https://github.com/OctoTools/OctoTools/blob/main/octotools/tools/advanced_object_detector/tool.py) to detect objects in images using API calls.
 
 3. **Enable tools for your tasks**: You can enable the whole toolset or a subset of tools for your own tasks by setting the `enabled_tools` argument in [tasks/solve.py](https://github.com/octotools/OctoTools/blob/main/tasks/solve.py).
