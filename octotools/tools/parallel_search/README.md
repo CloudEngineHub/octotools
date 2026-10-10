@@ -23,9 +23,11 @@ python examples/parallel_search.py
 ```
 
 The example loads `Parallel_Search_Tool` through `Initializer`, then executes
-search and fetch directly. It does not invoke an LLM. To use the tool in a Solver,
-include `"Parallel_Search_Tool"` in your existing `enabled_tools` list and keep your
-chosen model configuration. Other tools and Solver models need their own dependencies.
+search and fetch directly. It does not invoke an LLM. Select the tool with
+`enabled_tools=["Parallel_Search_Tool"]` in `Initializer`. The synchronous
+`execute` method also matches OctoTools' Executor command interface. Other tools
+and Solver models need their own dependencies; this minimal example does not
+run the Solver's planning loop.
 
 ```python
 from octotools.tools.parallel_search.tool import Parallel_Search_Tool

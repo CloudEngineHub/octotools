@@ -1,11 +1,13 @@
 import asyncio
 import builtins
 import json
+import tempfile
 import unittest
 from unittest.mock import patch
 
 import httpx
 
+from octotools.models.executor import Executor
 from octotools.models.initializer import Initializer
 from octotools.tools.parallel_search.tool import (
     MCP_URL,
@@ -204,6 +206,25 @@ class ParallelSearchTests(unittest.TestCase):
             result = Parallel_Search_Tool().execute(urls=["https://example.com"])
         self.assertIn("error", result)
         self.assertIn("fixture unavailable", result["error"])
+
+    def test_executor_dispatches_selected_native_tool(self):
+        selected = Initializer(
+            enabled_tools=["Parallel_Search_Tool"], model_string="gpt-4o"
+        )
+        with tempfile.TemporaryDirectory() as cache_dir, self.transport():
+            executor = Executor(llm_engine_name="gpt-4o")
+            executor.set_query_cache_dir(cache_dir)
+            results = executor.execute_tool_command(
+                selected.available_tools[0],
+                'execution = tool.execute(objective="Python docs", search_queries=["Python official documentation"], session_id="executor-conversation")',
+            )
+        self.assertIsInstance(results, list, results)
+        self.assertEqual(
+            results[0]["structuredContent"], self.result["structuredContent"]
+        )
+        self.assertEqual(
+            self.calls[0]["arguments"]["session_id"], "executor-conversation"
+        )
 
 
 if __name__ == "__main__":
