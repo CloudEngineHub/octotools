@@ -1,6 +1,7 @@
 import asyncio
 import builtins
 import json
+import os
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -161,7 +162,7 @@ class ParallelSearchTests(unittest.TestCase):
             with self.subTest(timeout=timeout), self.assertRaises(ValueError):
                 Parallel_Search_Tool(timeout=timeout)
 
-    def test_missing_sdk_returns_installation_guidance(self):
+    def test_missing_sdk_prevents_registration_and_explains_installation(self):
         original = builtins.__import__
 
         def without_mcp(name, *args, **kwargs):
@@ -170,8 +171,26 @@ class ParallelSearchTests(unittest.TestCase):
             return original(name, *args, **kwargs)
 
         with patch("builtins.__import__", side_effect=without_mcp):
-            result = Parallel_Search_Tool().execute(urls=["https://example.com"])
-        self.assertIn("parallel-search", result["error"])
+            with self.assertRaisesRegex(ImportError, "parallel-search"):
+                Parallel_Search_Tool()
+
+            # Isolate discovery from unrelated tools and their dependencies.
+            tool_dir = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "octotools", "tools", "parallel_search",
+            )
+            with patch(
+                "octotools.models.initializer.os.walk",
+                return_value=[(tool_dir, [], ["tool.py"])],
+            ), self.transport():
+                for enabled_tools in (["all"], ["Parallel_Search_Tool"]):
+                    with self.subTest(enabled_tools=enabled_tools):
+                        selected = Initializer(
+                            enabled_tools=enabled_tools, model_string="gpt-4o"
+                        )
+                        self.assertNotIn("Parallel_Search_Tool", selected.available_tools)
+                        self.assertNotIn("Parallel_Search_Tool", selected.toolbox_metadata)
+        self.assertEqual(self.requests, [])
 
     def test_active_event_loop_returns_clear_error(self):
         async def run():

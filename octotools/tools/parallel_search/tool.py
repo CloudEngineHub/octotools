@@ -19,6 +19,14 @@ class Parallel_Search_Tool(BaseTool):
     """Synchronous OctoTools tool using anonymous MCP Streamable HTTP."""
 
     def __init__(self, timeout=60):
+        # The loader must skip this optional tool when its SDK is unavailable.
+        try:
+            import mcp
+        except ImportError as exc:
+            raise ImportError(
+                "Install the parallel-search extra: pip install '.[parallel-search]'"
+            ) from exc
+
         super().__init__(
             tool_name="Parallel_Search_Tool",
             tool_description=(
